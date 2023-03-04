@@ -1,0 +1,77 @@
+// Importation de la bibliothèque discord.js
+const Discord = require('discord.js');
+
+// Création du client Discord
+const client = new Discord.Client();
+
+// Événement de connexion du client
+client.on('ready', () => {
+  console.log(`Connecté en tant que ${client.user.tag}!`);
+});
+
+// Événement de message reçu
+client.on('message', message => {
+  // Si le message commence par le préfixe et provient d'un utilisateur avec une certaine permission
+  if (message.content.startsWith('!') && message.member.hasPermission('BAN_MEMBERS')) {
+    // Séparation de la commande et des arguments
+    const args = message.content.slice(1).split(' ');
+    const command = args.shift().toLowerCase();
+
+    // Si la commande est "ban"
+    if (command === 'ban') {
+      // Récupération de l'utilisateur mentionné
+      const user = message.mentions.users.first();
+      if (user) {
+        // Récupération de l'objet membre correspondant à l'utilisateur mentionné
+        const member = message.guild.member(user);
+        if (member) {
+          // Bannissement de l'utilisateur
+          member.ban({reason: 'Motif de bannissement'}).then(() => {
+            // Envoi d'un message de confirmation
+            message.reply(`L'utilisateur ${user.tag} a été banni.`);
+          }).catch(err => {
+            // En cas d'erreur, envoi d'un message d'erreur
+            message.reply(`Je n'ai pas pu bannir cet utilisateur. Erreur : ${err}`);
+          });
+        } else {
+          message.reply('Cet utilisateur n\'est pas membre de ce serveur.');
+        }
+      } else {
+        message.reply('Veuillez mentionner l\'utilisateur à bannir.');
+      }
+    }
+
+    // Si la commande est "mute"
+    if (command === 'mute') {
+      // Récupération de l'utilisateur mentionné
+      const user = message.mentions.users.first();
+      if (user) {
+        // Récupération de l'objet membre correspondant à l'utilisateur mentionné
+        const member = message.guild.member(user);
+        if (member) {
+          // Rôle à appliquer pour le silence
+          const muteRole = message.guild.roles.cache.find(role => role.name === 'Muted');
+          if (muteRole) {
+            // Application du rôle "mute"
+            member.roles.add(muteRole).then(() => {
+              // Envoi d'un message de confirmation
+              message.reply(`L'utilisateur ${user.tag} a été réduit au silence.`);
+            }).catch(err => {
+              // En cas d'erreur, envoi d'un message d'erreur
+              message.reply(`Je n'ai pas pu réduire au silence cet utilisateur. Erreur : ${err}`);
+            });
+          } else {
+            message.reply('Le rôle "Muted" n\'existe pas sur ce serveur.');
+          }
+        } else {
+          message.reply('Cet utilisateur n\'est pas membre de ce serveur.');
+        }
+      } else {
+        message.reply('Veuillez mentionner l\'utilisateur à réduire au silence.');
+      }
+    }
+  }
+});
+
+// Connexion du client à Discord avec le token
+client.login('MTA4MTY3OTY0MTA2MTg4MzkzNA.GnJJ23.pCptwxLQt3NbM2hkkL81iyIb0Z2-ZZ2MZS-q_A');
